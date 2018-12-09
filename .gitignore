@@ -1,0 +1,23 @@
+#OS junk files
+[Tt]humbs.db
+*.DS_Store
+
+GIF/
+timesteps/
+
+xfoil.exe
+
+#LaTeX 
+*.aux
+*.log
+*.nlo
+*.out
+*.gz
+*.toc
+
+#MATLAB
+*.asv
+
+
+
+
