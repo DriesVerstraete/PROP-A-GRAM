@@ -99,10 +99,48 @@ for i = 1:num_stations
     station(i).points = matVLST(idx,:);
     station(i).points(:,2) = station_location(i);
     scatter3(station(i).points(:,1), station(i).points(:,2), station(i).points(:,3), 2, 'xr');
-    [fitresult, ~] = createFit(station(i).points(:,1), station(i).points(:,3));
-    station(i).camberline = fitresult;
-    station(i).leading_edge = min(station(i).points(:,1));
-    station(i).trailing_edge = max(station(i).points(:,1));
+    
+    tmp1 = repmat(station(i).points, 1, 1, size(station(i).points,1));
+    tmp2 = repmat(reshape(station(i).points', 1, 3, size(station(i).points,1)), size(station(i).points,1),1,1);
+    lens = sqrt(sum((tmp2 - tmp1).^2, 2));
+    [idx1,~] = find(lens >= max(max(lens)));
+    tmp1 = station(i).points(idx1,:);
+    [~,idx] = sort(tmp1(:,1),1,'ascend');
+    tmp1 = tmp1(idx,:);
+    
+    station(i).leading_edge = tmp1(1,:);
+    station(i).trailing_edge = tmp1(2,:);
+    
+%     hFig20 = figure(20);
+%     clf(20);
+%     scatter(station(i).points(:,1), station(i).points(:,3),20,'xk')
+%     hold on
+%     scatter(tmp1(:,1), tmp1(:,3), 'or')
+%     hold off
+%     grid minor
+%     box on
+%     axis equal
+    
+    %%
+%     LE = tmp1(1,:);
+%     TE = tmp1(2,:);
+%     chord = norm(LE - TE);
+%         
+%     p = [0.0288    0.3368    0.1159    0.2447    0.2544    0.0302   -0.9551    0.0010    0.0108    4.3094   11.1424    0.3994];
+%     truncation = 0.2;
+%     eps = acosd(dot([-1 0], (LE(1:2:3) - TE(1:2:3))./chord));
+%     z = [p, truncation, eps];
+%     
+%     nvars = length(z);
+%     lb = [0.005 0.25    0.03    -1  0.25    0.03 -1  -0.01    0.008  -5 10 0.32 0 -10];
+%     ub = [0.04  0.4     0.15     1   0.4     0.10  1   0.01    0.012  5 20  0.40 0.2 70];
+%    
+%     options = optimoptions('ga', 'Display', 'iter', 'InitialPopulation',z, 'UseParallel', true, 'MaxGenerations', 1000, 'StallGenLimit', 50, 'MutationFcn','mutationadaptfeasible', 'CreationFcn', 'gacreationlinearfeasible');
+%     [x,fval,exitflag,output,population,scores] = ga({@fcnOBJECTIVE, station(i).points(:,1:2:3), LE, chord},nvars,[],[],[],[],lb,ub,[],[],options);
+%     
+%     [~, foil] = fcnOBJECTIVE(x, station(i).points(:,1:2:3), LE, chord);
+%     plot(foil(:,1), foil(:,2),'--om')
+ 
 end
 hold off
 
@@ -110,38 +148,29 @@ hold off
 
 % This part needs to be fixed
 for i = 1:num_stations
-    station(i).chord_stations = [station(i).leading_edge, station(i).trailing_edge];
-    station(i).chord_z = [station(i).camberline(station(i).leading_edge), station(i).camberline(station(i).trailing_edge)]';
-    tmp = [station(i).leading_edge - station(i).trailing_edge, station(i).chord_z(1) - station(i).chord_z(end)];
-    chord_actual(i) = norm(tmp);
-    tmp = tmp./sqrt(sum(tmp.^2,2));
-    station(i).pitch = acosd(dot([-1 0], tmp, 2));
+    chord_actual(i) = norm(station(i).leading_edge - station(i).trailing_edge);
+    tmp = (station(i).leading_edge - station(i).trailing_edge)./chord_actual(i);
+    station(i).pitch = acosd(dot([-1 0 0], tmp, 2));
     
-    %     hFig20 = figure(20);
-    %     clf(20);
-    %     scatter(station(i).points(:,1), station(i).points(:,3),20,'xk')
-    %     grid minor
-    %     box on
-    %     axis equal
-    %
-    %     hold on
-    %     tmp2 = linspace(station(i).leading_edge, station(i).trailing_edge, 100);
-    %     plot(tmp2, station(i).camberline(tmp2), ':^m')
-    %     plot(station(i).chord_stations, station(i).chord_z, '-sr')
-    %     hold off
-    
+%     hFig20 = figure(20);
+%     clf(20);
+%     scatter(station(i).points(:,1), station(i).points(:,3),20,'xk')
+%     grid minor
+%     box on
+%     axis equal
+        
     beta(i) = station(i).pitch;
 end
 
 %% Spanwise
-hold on
-for i = 1:num_stations - 1
-    x = [station(i).leading_edge; station(i).trailing_edge; station(i+1).trailing_edge; station(i+1).leading_edge;];
-    y = [repmat(station_location(i), 2, 1); repmat(station_location(i+1),2,1)];
-    z = [station(i).camberline(x(1:2)); station(i+1).camberline(x(3:4))];
-    patch(x,y,z,'b','LineWidth',2,'EdgeAlpha',0.6,'FaceAlpha',0.2);
-end
-hold off
+% hold on
+% for i = 1:num_stations - 1
+%     x = [station(i).leading_edge; station(i).trailing_edge; station(i+1).trailing_edge; station(i+1).leading_edge;];
+%     y = [repmat(station_location(i), 2, 1); repmat(station_location(i+1),2,1)];
+%     z = [station(i).camberline(x(1:2)); station(i+1).camberline(x(3:4))];
+%     patch(x,y,z,'b','LineWidth',2,'EdgeAlpha',0.6,'FaceAlpha',0.2);
+% end
+% hold off
 
 %% Compare
 try

@@ -18,9 +18,9 @@ function [fitresult, gof] = createFit(XDATA, ZDATA)
 [xData, yData] = prepareCurveData( XDATA, ZDATA );
 
 % Set up fittype and options.
-ft = fittype( 'poly3' );
+ft = fittype( 'poly2' );
 
 % Fit model to data.
-[fitresult, gof] = fit( xData, yData, ft, 'Normalize', 'on' );
+[fitresult, gof] = fit( xData, yData, ft);
 
 
