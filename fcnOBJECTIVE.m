@@ -4,13 +4,13 @@ truncation = z(end - 1);
 eps = z(end);
 
 p = z(1:end-2);
-foil = fcnPARSEC2COORD(p,100).*(chord.*(1 + truncation));
+foil = fcnPARSEC2COORD(p,50).*(chord.*(1 + truncation));
 
 u_x = 0;
 u_y = 0;
 u_z = 0;
-theta = eps;
-R = [cos(theta) -sin(theta); sin(theta) cos(theta)];
+theta = -eps;
+R = [cosd(theta) -sind(theta); sind(theta) cosd(theta)];
 
 for kk = 1:size(foil)
     foil(kk,:) = R*foil(kk,:)';

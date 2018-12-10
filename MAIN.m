@@ -90,15 +90,17 @@ grid minor
 box on
 
 num_stations = 20;
-station_width = 0.005;
+station_width = 0.001;
 
 station_location = linspace(root, tip, num_stations);
-hold on
 for i = 1:num_stations
     idx = station_location(i) - station_width <= matVLST(:,2) & matVLST(:,2) <= station_location(i) + station_width;
     station(i).points = matVLST(idx,:);
     station(i).points(:,2) = station_location(i);
+    figure(1);
+    hold on
     scatter3(station(i).points(:,1), station(i).points(:,2), station(i).points(:,3), 2, 'xr');
+    hold off
     
     tmp1 = repmat(station(i).points, 1, 1, size(station(i).points,1));
     tmp2 = repmat(reshape(station(i).points', 1, 3, size(station(i).points,1)), size(station(i).points,1),1,1);
@@ -116,33 +118,43 @@ for i = 1:num_stations
 %     scatter(station(i).points(:,1), station(i).points(:,3),20,'xk')
 %     hold on
 %     scatter(tmp1(:,1), tmp1(:,3), 'or')
-%     hold off
 %     grid minor
 %     box on
 %     axis equal
-    
-    %%
+%     
+%     %
 %     LE = tmp1(1,:);
 %     TE = tmp1(2,:);
 %     chord = norm(LE - TE);
-%         
-%     p = [0.0288    0.3368    0.1159    0.2447    0.2544    0.0302   -0.9551    0.0010    0.0108    4.3094   11.1424    0.3994];
-%     truncation = 0.2;
-%     eps = acosd(dot([-1 0], (LE(1:2:3) - TE(1:2:3))./chord));
-%     z = [p, truncation, eps];
+%     
+%     lb = [  0.005   0.1    0.03      -1          0.1        0.01        -1          -0.2       0.0005      -40      -40     0       -10];
+%     ub = [  0.06    0.5    0.4       1           0.5        0.10        1           0.2        0.005       40       40      0.1     70];
+%     
+%     if i == 1
+%         p = [   0.05    0.3    0.21      0.1738      0.3414     0.0180      -0.005      -0.15       0.002       -30     20 ];
+%         truncation = 0.1;
+%         eps = acosd(dot([-1 0], (LE(1:2:3) - TE(1:2:3))./chord));
+%         z = [p, truncation, eps];
+%     else
+%         z = x(i-1,:);
+%     end
 %     
 %     nvars = length(z);
-%     lb = [0.005 0.25    0.03    -1  0.25    0.03 -1  -0.01    0.008  -5 10 0.32 0 -10];
-%     ub = [0.04  0.4     0.15     1   0.4     0.10  1   0.01    0.012  5 20  0.40 0.2 70];
-%    
-%     options = optimoptions('ga', 'Display', 'iter', 'InitialPopulation',z, 'UseParallel', true, 'MaxGenerations', 1000, 'StallGenLimit', 50, 'MutationFcn','mutationadaptfeasible', 'CreationFcn', 'gacreationlinearfeasible');
-%     [x,fval,exitflag,output,population,scores] = ga({@fcnOBJECTIVE, station(i).points(:,1:2:3), LE, chord},nvars,[],[],[],[],lb,ub,[],[],options);
 %     
-%     [~, foil] = fcnOBJECTIVE(x, station(i).points(:,1:2:3), LE, chord);
-%     plot(foil(:,1), foil(:,2),'--om')
- 
+%     %     options = optimoptions('ga', 'Display', 'iter', 'InitialPopulation',z, 'UseParallel', true, 'MaxGenerations', 10000, 'StallGenLimit', 20, 'MutationFcn','mutationadaptfeasible', 'CreationFcn', 'gacreationlinearfeasible');
+%     %     [x,fval,exitflag,output,population,scores] = ga({@fcnOBJECTIVE, station(i).points(:,1:2:3), LE, chord},nvars,[],[],[],[],lb,ub,[],[],options);
+%     f1 = @(z)fcnOBJECTIVE(z, station(i).points(:,1:2:3), LE, chord);
+%     options = optimoptions('fmincon','Display','iter','TolX',1e-20,'MaxFunctionEvaluations',1e4);
+%     [x(i,:),fval] = fmincon(f1, z, [], [], [], [], lb, ub, [], options);
+%     [~, foil(:,:,i)] = fcnOBJECTIVE(x(i,:), station(i).points(:,1:2:3), LE, chord);
+%     airfoil_chord(i) = chord.*(1 + truncation);
+%     airfoil_beta = acosd(dot([-1 0],  (LE(1:2:3) - (foil(1,:,i) + foil(end,:,i))./2)./airfoil_chord(i), 2));
+%     
+%     
+%     plot(foil(:,1,i), foil(:,2,i),'--om')
+%     hold off
+    
 end
-hold off
 
 %% Chordwise Stations
 
@@ -152,13 +164,13 @@ for i = 1:num_stations
     tmp = (station(i).leading_edge - station(i).trailing_edge)./chord_actual(i);
     station(i).pitch = acosd(dot([-1 0 0], tmp, 2));
     
-%     hFig20 = figure(20);
-%     clf(20);
-%     scatter(station(i).points(:,1), station(i).points(:,3),20,'xk')
-%     grid minor
-%     box on
-%     axis equal
-        
+    %     hFig20 = figure(20);
+    %     clf(20);
+    %     scatter(station(i).points(:,1), station(i).points(:,3),20,'xk')
+    %     grid minor
+    %     box on
+    %     axis equal
+    
     beta(i) = station(i).pitch;
 end
 

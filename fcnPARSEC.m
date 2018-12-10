@@ -49,7 +49,7 @@ c12=[1,0,0,0,0,0];
 Clo=[c7; c8; c9; c10; c11; c12];
 
 bup=[p(8)+p(9)/2;p(3);tand(p(10)-p(11)/2);0;p(4);(sqrt(2*p(1)))];
-blo=[p(8)+p(9)/2;p(6);tand(p(10)-p(11)/2);0;p(7);(sqrt(2*p(1)))];
+blo=[-p(8)+p(9)/2;p(6);tand(-p(10)-p(11)/2);0;p(7);(sqrt(2*p(1)))];
 
 % Solve system of equations: C x a=b
 aup=linsolve(Cup,bup); 

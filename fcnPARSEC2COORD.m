@@ -3,8 +3,8 @@ a = fcnPARSEC(p);
 
 point = Sgrad;
 n = (1/point);
-nn = n/5; % to create more points at the LE
-
+nn = n/2; % to create more points at the LE
+% nn = n;
 % Upper surface coordinates
 x1 = 1:-n:0.1;
 x2 = 0.1:-nn:0;
